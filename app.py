@@ -17,3 +17,30 @@ class Product(BaseModel):
     
 class Results(BaseModel):
     dataset: list[Product] = Field(title="Dataset", description="The list of products")
+    
+    
+# defining agent
+web_scraping_agent = Agent(
+    name="Web Scraping Agent",
+    model=GEMINI_MODEL,
+    system_prompt=("""
+        Your task is to extract relevant product information from the provided HTML content 
+    and return it as a list of dictionaries. Each dictionary should contain the following 
+    fields if they are present: 'brand_name', 'product_name', 'price', and 'rating_count'.
+    
+    Step 1: Use the `fetch_html_text(url)` function to fetch the HTML content from the provided URL. 
+    Step 2: Parse and extract the required fields from the HTML. 
+    Step 3: Clean the data by removing unnecessary HTML tags, scripts, and any irrelevant content.
+    Step 4: Return the extracted data as a list of dictionaries with the following format:
+      [
+        {"brand_name": "BrandA", "product_name": "Product 1", "price": "$100", "rating_count": 120},
+        ...
+      ]      
+    """),
+    retries=3,
+    result_type=Results,
+    model_settings=ModelSettings(
+        max_tokens=8000,
+        temperature=0.1
+    )
+)
