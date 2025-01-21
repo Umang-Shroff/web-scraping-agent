@@ -1,4 +1,3 @@
-# app.py
 import os
 import pandas as pd
 from httpx import Client
@@ -10,18 +9,17 @@ from pydantic_ai.exceptions import UnexpectedModelBehavior
 from model import GEMINI_MODEL
 import datetime
 
-# providing a schema for pydantic
+# Providing a schema for pydantic
 class Product(BaseModel):
     brand_name: str = Field(title="Brand Name", description="The brand name of the product")
     product_name: str = Field(title="Product Name", description="The name of the product")
     price: str | None = Field(title="Price", description="The price of the product")
     rating_count: int | None = Field(title="Rating Count", description="The ratings for the product")
-    
+
 class Results(BaseModel):
     dataset: list[Product] = Field(title="Dataset", description="The list of products")
-    
-    
-# defining agent
+
+# Defining agent
 web_scraping_agent = Agent(
     name="Web Scraping Agent",
     model=GEMINI_MODEL,
@@ -34,7 +32,7 @@ web_scraping_agent = Agent(
     )
 )
 
-# define custom function
+# Define custom function to fetch HTML text
 @web_scraping_agent.tool_plain(retries=1)
 def fetch_html_text(url: str) -> str:
     """
@@ -59,15 +57,15 @@ def fetch_html_text(url: str) -> str:
             print(f"Error occurred while fetching HTML: {e}")
             return f"Error occurred: {e}"
 
-
-# main function
+# Main function
 def main() -> None:
+    # Input website URL
     prompt = 'https://www.ikea.com/us/en/cat/best-sellers/'
 
     try:
-        print("Running web scraping agent...")  # Added debugging print here
+        print("Running web scraping agent...") 
         response = web_scraping_agent.run_sync(prompt)
-        print("Response from agent:", response)  # Added to debug response
+        print("Response from agent:", response)
         
         if response.data is None:
             raise UnexpectedModelBehavior("The model did not return any data.")
@@ -76,19 +74,18 @@ def main() -> None:
         print('Input_tokens: ', response.usage().request_tokens)
         print('Output_tokens: ', response.usage().response_tokens)
         print('Total tokens: ', response.usage().total_tokens)
-        
+         
         lst = []
         for item in response.data.dataset:
             lst.append(item.model_dump())
-        
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+         
         df = pd.DataFrame(lst)
-        df.to_csv(f'scrapped_{timestamp}.csv', index=False)
-        print(f"Data saved to scrapped_{timestamp}.csv")
-    
+         
+        print("\nExtracted Product Data:")
+        print(df.to_string(index=False)) 
+        
     except UnexpectedModelBehavior as e:
         print(f"Error: {e}")
-
 
 if __name__ == '__main__':
     main()
