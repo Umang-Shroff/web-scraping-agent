@@ -7,6 +7,7 @@ from pydantic_ai import Agent
 from pydantic_ai.settings import ModelSettings
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from model import GEMINI_MODEL
+import datetime
 
 # providing a schema for pydantic
 class Product(BaseModel):
@@ -72,3 +73,30 @@ def fetch_html_text(url: str) -> str:
             f.write(str(soup))
         print('Soup file saved')
         return soup.get_text().replace('\n', '').replace('\r', '')
+    
+
+# main function
+def main() -> None:
+    prompt = ''
+    
+    try:
+        response = web_scraping_agent.run_sync(prompt)
+        
+        if response.data is None:
+            raise UnexpectedModelBehavior("The model did not return any data.")
+        
+        print('-' * 50)
+        print('Input_tokens: ', response.usage().request_tokens)
+        print('Output_tokens: ', response.usage().response_tokens)
+        print('Total tokens: ', response.usage().total_tokens)
+        
+        lst = []
+        for item in response.data.dataset:
+            lst.append(item.model_dump())
+        
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        df = pd.DataFrame(lst)
+        df.to_csv(f'scrapped_{timestamp}.csv', index=False)
+    
+    except UnexpectedModelBehavior as e:
+        print(f"Error: {e}")
