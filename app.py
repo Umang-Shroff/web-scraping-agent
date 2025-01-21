@@ -77,7 +77,8 @@ def fetch_html_text(url: str) -> str:
 
 # main function
 def main() -> None:
-    prompt = ''
+    # put the website url here
+    prompt = 'https://www.ikea.com/us/en/cat/best-sellers/'
     
     try:
         response = web_scraping_agent.run_sync(prompt)
