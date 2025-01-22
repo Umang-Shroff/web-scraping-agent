@@ -72,18 +72,20 @@ def fetch_latest_news() -> pd.DataFrame:
     return pd.DataFrame(articles)
 
 # Function to display news in cards
+# Function to display news in cards with dark mode styling
 def display_news_in_cards(df: pd.DataFrame):
     for index, row in df.iterrows():
         st.markdown(
             f"""
-            <div style="background-color: #f7f7f7; border-radius: 10px; padding: 15px; margin-bottom: 20px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-                <h3 style="color: #333333;">{row['title']}</h3>
-                <p style="color: #777777; font-size: 14px;">Published on: {row['published']}</p>
-                <p style="color: #555555; font-size: 16px; margin-top: 10px;">{row['summary']}</p>
+            <div style="background-color: #333333; color: white; border-radius: 10px; padding: 15px; margin-bottom: 20px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); transition: all 0.3s ease-in-out;">
+                <h3 style="color: #ffffff;">{row['title']}</h3>
+                <p style="color: #cccccc; font-size: 14px;">Published on: {row['published']}</p>
+                <p style="color: #dddddd; font-size: 16px; margin-top: 10px;">{row['summary']}</p>
                 <a href="{row['link']}" target="_blank" style="color: #1e90ff; font-size: 16px; text-decoration: none; font-weight: bold;">Read more...</a>
             </div>
             """, unsafe_allow_html=True
         )
+
 
 # Function to scrape e-commerce website (runs asynchronously)
 async def scrape_ecommerce_data_async(url: str):
@@ -126,8 +128,8 @@ def main():
             else:
                 st.write("Please enter a valid URL.")
 
-    if option == "Daily Tech News":
-        st.write("Fetching the latest tech news...")
+    if option == "Daily News":
+        st.write("Fetching the latest news...")
         df = fetch_latest_news()
         st.write("Latest Tech News:")
         display_news_in_cards(df)
