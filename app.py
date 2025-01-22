@@ -1,9 +1,9 @@
 import os
 import pandas as pd
-import subprocess
 import feedparser
 import streamlit as st
 from datetime import datetime
+import asyncio
 from httpx import Client
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
@@ -11,7 +11,6 @@ from pydantic_ai import Agent
 from pydantic_ai.settings import ModelSettings
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from model import GEMINI_MODEL
-import sys
 
 # RSS Feed URL for news
 RSS_FEED_URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
@@ -86,10 +85,10 @@ def display_news_in_cards(df: pd.DataFrame):
             """, unsafe_allow_html=True
         )
 
-# Function to scrape e-commerce website
-def scrape_ecommerce_data(url: str):
+# Function to scrape e-commerce website (runs asynchronously)
+async def scrape_ecommerce_data_async(url: str):
     try:
-        response = web_scraping_agent.run_sync(url)
+        response = await web_scraping_agent.run(url)
         
         if response.data is None:
             raise UnexpectedModelBehavior("The model did not return any data.")
@@ -101,6 +100,10 @@ def scrape_ecommerce_data(url: str):
     except UnexpectedModelBehavior as e:
         return f"Error: {e}"
 
+# Function to run the async code within Streamlit's synchronous context
+def scrape_ecommerce_data(url: str):
+    return asyncio.run(scrape_ecommerce_data_async(url))
+
 # Streamlit UI
 def main():
     st.title('News and E-commerce Scraper')
@@ -110,20 +113,23 @@ def main():
     
     if option == "Scrape E-commerce Website":
         url = st.text_input("Enter the URL of the e-commerce website to scrape:")
-
-        if url:
-            st.write(f"Fetching data from {url}...")
-            df = scrape_ecommerce_data(url)
-            if isinstance(df, pd.DataFrame):
-                st.write("E-commerce Products:")
-                st.dataframe(df)
+        
+        if st.button("Submit"):
+            if url:
+                st.write(f"Fetching data from {url}...")
+                df = scrape_ecommerce_data(url)
+                if isinstance(df, pd.DataFrame):
+                    st.write("E-commerce Products:")
+                    st.dataframe(df)
+                else:
+                    st.write(df)  # If an error occurs, show the message
             else:
-                st.write(df)  # If an error occurs, show the message
+                st.write("Please enter a valid URL.")
 
-    if option == "Daily News":
-        st.write("Fetching the latest news...")
+    if option == "Daily Tech News":
+        st.write("Fetching the latest tech news...")
         df = fetch_latest_news()
-        st.write("Latest News:")
+        st.write("Latest Tech News:")
         display_news_in_cards(df)
 
 if __name__ == '__main__':
