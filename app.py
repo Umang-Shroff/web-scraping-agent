@@ -8,6 +8,14 @@ from pydantic_ai.settings import ModelSettings
 from pydantic_ai.exceptions import UnexpectedModelBehavior
 from model import GEMINI_MODEL
 import datetime
+import sys
+
+# Get URL from command-line argument
+url = sys.argv[1] if len(sys.argv) > 1 else ""
+
+if not url:
+    print("Please provide a valid URL.")
+    sys.exit(1)
 
 # Providing a schema for pydantic
 class Product(BaseModel):
@@ -59,12 +67,13 @@ def fetch_html_text(url: str) -> str:
 
 # Main function
 def main() -> None:
+    # EXAMPLE URL - https://www.ikea.com/us/en/cat/best-sellers/
     # Input website URL
-    prompt = 'https://www.ikea.com/us/en/cat/best-sellers/'
-
+    print(f"Running web scraping agent on URL: {url}")
+    
     try:
         print("Running web scraping agent...") 
-        response = web_scraping_agent.run_sync(prompt)
+        response = web_scraping_agent.run_sync(url)
         print("Response from agent:", response)
         
         if response.data is None:

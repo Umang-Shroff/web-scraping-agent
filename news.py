@@ -1,4 +1,6 @@
 import streamlit as st
+import subprocess
+import os
 import feedparser
 import pandas as pd
 from datetime import datetime
@@ -37,8 +39,19 @@ def main():
     st.markdown("### Choose an option:")
     
     if st.button('Scrape E-commerce Website'):
-        st.write("Scraping e-commerce website... (Functionality to be added)")
-        st.write("E-commerce data will be displayed here once scraping is complete.")
+        url = st.text_input("Enter the URL of the e-commerce website you want to scrape:")
+
+        if url:
+            st.write(f"Fetching data from {url}...")
+            try:
+                # Call app.py using subprocess and pass the URL to it
+                subprocess.run(["python", "app.py", url], check=True)
+                st.write("E-commerce data scraped successfully!")
+                # Here you can handle displaying the output
+                # Example: you can call a method to show the scraped products
+                # display_product_data()
+            except subprocess.CalledProcessError as e:
+                st.write(f"Error occurred while scraping the e-commerce site: {e}")
 
     if st.button('Daily News'):
         st.write("Fetching the latest news...")
