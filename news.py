@@ -1,13 +1,12 @@
+import streamlit as st
 import feedparser
 import pandas as pd
 from datetime import datetime
 
-# tech news rss feed
 RSS_FEED_URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
 
 def fetch_latest_news() -> pd.DataFrame:
     feed = feedparser.parse(RSS_FEED_URL)
-    
     articles = []
     for entry in feed.entries:
         article = {
@@ -17,15 +16,35 @@ def fetch_latest_news() -> pd.DataFrame:
             'summary': entry.summary,
         }
         articles.append(article)
-    
     df = pd.DataFrame(articles)
     return df
 
+def display_news_in_cards(df: pd.DataFrame):
+    for index, row in df.iterrows():
+        st.markdown(
+            f"""
+            <div style="background-color: #f7f7f7; border-radius: 10px; padding: 15px; margin-bottom: 20px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+                <h3 style="color: #333333;">{row['title']}</h3>
+                <p style="color: #777777; font-size: 14px;">Published on: {row['published']}</p>
+                <p style="color: #555555; font-size: 16px; margin-top: 10px;">{row['summary']}</p>
+                <a href="{row['link']}" target="_blank" style="color: #1e90ff; font-size: 16px; text-decoration: none; font-weight: bold;">Read more...</a>
+            </div>
+            """, unsafe_allow_html=True
+        )
+
 def main():
-    print("Fetching the latest news...")
-    df = fetch_latest_news()
-    print("Latest News:")
-    print(df)
+    st.title('News and E-commerce Scraper')
+    st.markdown("### Choose an option:")
+    
+    if st.button('Scrape E-commerce Website'):
+        st.write("Scraping e-commerce website... (Functionality to be added)")
+        st.write("E-commerce data will be displayed here once scraping is complete.")
+
+    if st.button('Daily News'):
+        st.write("Fetching the latest news...")
+        df = fetch_latest_news()
+        st.write("Latest News:")
+        display_news_in_cards(df)
 
 if __name__ == '__main__':
     main()
