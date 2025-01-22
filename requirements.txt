@@ -2,3 +2,8 @@ pydantic_ai
 beautifulsoup4
 pandas
 python-dotenv
+feedparser 
+pandas 
+requests 
+schedule
+streamlit
