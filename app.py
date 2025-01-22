@@ -72,7 +72,6 @@ def fetch_latest_news() -> pd.DataFrame:
     return pd.DataFrame(articles)
 
 # Function to display news in cards
-# Function to display news in cards with dark mode styling
 def display_news_in_cards(df: pd.DataFrame):
     for index, row in df.iterrows():
         st.markdown(
@@ -106,7 +105,7 @@ async def scrape_ecommerce_data_async(url: str):
 def scrape_ecommerce_data(url: str):
     return asyncio.run(scrape_ecommerce_data_async(url))
 
-# Streamlit UI
+# Streamlit
 def main():
     st.title('News and E-commerce Scraper')
     st.markdown("### Choose an option:")
@@ -124,7 +123,7 @@ def main():
                     st.write("E-commerce Products:")
                     st.dataframe(df)
                 else:
-                    st.write(df)  # If an error occurs, show the message
+                    st.write(df) 
             else:
                 st.write("Please enter a valid URL.")
 
